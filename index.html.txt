@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>User Management Dashboard</h1>
+
+    <button id="addUserButton">Add User</button>
+
+    <div id="userList">
+        <table id="userTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <!-- User list will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="userForm" class="hidden">
+        <h2 id="formTitle">Add User</h2>
+        <form id="form" onsubmit="submitForm(event)">
+            <input type="text" id="firstName" placeholder="First Name" required>
+            <input type="text" id="lastName" placeholder="Last Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="text" id="department" placeholder="Department" required>
+            <button type="submit" id="submitButton">Submit</button>
+            <button type="button" id="cancelButton" onclick="cancelForm()">Cancel</button>
+        </form>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

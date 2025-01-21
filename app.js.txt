@@ -1,0 +1,176 @@
+const API_URL = "https://jsonplaceholder.typicode.com/users";
+let users = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Fetch users when the page loads
+    fetchUsers();
+
+    // Event listener for Add User button
+    document.getElementById('addUserButton').addEventListener('click', () => {
+        showForm();
+    });
+});
+
+// Fetch users from JSONPlaceholder API
+async function fetchUsers() {
+    try {
+        const response = await fetch(API_URL);
+        users = await response.json();
+        renderUserList();
+    } catch (error) {
+        alert('Error fetching users!');
+    }
+}
+
+// Render the list of users
+function renderUserList() {
+    const userTableBody = document.getElementById("userTableBody");
+    userTableBody.innerHTML = ''; // Clear previous list
+
+    users.forEach(user => {
+        const userRow = document.createElement("tr");
+        userRow.innerHTML = `
+            <td>${user.id}</td>
+            <td>${user.name.split(' ')[0]}</td>
+            <td>${user.name.split(' ')[1]}</td>
+            <td>${user.email}</td>
+            <td>${user.company.name}</td>
+            <td>
+                <button onclick="editUser(${user.id})">Edit</button>
+                <button onclick="deleteUser(${user.id})">Delete</button>
+            </td>
+        `;
+        userTableBody.appendChild(userRow);
+    });
+}
+
+// Show the form to add or edit a user
+function showForm(user = null) {
+    document.getElementById('userForm').classList.remove('hidden');
+
+    // Set form title and pre-fill fields if editing
+    document.getElementById('formTitle').textContent = user ? 'Edit User' : 'Add User';
+    document.getElementById('firstName').value = user ? user.name.split(' ')[0] : '';
+    document.getElementById('lastName').value = user ? user.name.split(' ')[1] : '';
+    document.getElementById('email').value = user ? user.email : '';
+    document.getElementById('department').value = user ? user.company.name : '';
+
+    // Set form action: Pass the userId if editing or call the add function
+    const submitButton = document.getElementById('submitButton');
+    if (user) {
+        submitButton.onclick = (event) => submitEditForm(event, user.id);
+    } else {
+        submitButton.onclick = submitAddForm;
+    }
+}
+
+// Submit the form to add a new user
+async function submitAddForm(event) {
+    event.preventDefault();
+
+    // Validate email format before submitting
+    const email = document.getElementById('email').value;
+    if (!isValidEmail(email)) {
+        alert('Please enter a valid email address.');
+        return; // Stop further execution if email is invalid
+    }
+
+    const newUser = {
+        name: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`,
+        email: email,
+        company: { name: document.getElementById('department').value },
+    };
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(newUser),
+            headers: { 'Content-Type': 'application/json' },
+        });
+        const addedUser = await response.json();
+        users.push(addedUser);
+        renderUserList();
+        cancelForm();
+    } catch (error) {
+        alert('Error adding user!');
+    }
+}
+
+// Submit the form to edit an existing user
+async function submitEditForm(event, userId) {
+    event.preventDefault();
+
+    // Validate email format before submitting
+    const email = document.getElementById('email').value;
+    if (!isValidEmail(email)) {
+        alert('Please enter a valid email address.');
+        return; // Stop further execution if email is invalid
+    }
+
+    const updatedUser = {
+        name: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`,
+        email: email,
+        company: { name: document.getElementById('department').value },
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/${userId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updatedUser),
+            headers: { 'Content-Type': 'application/json' },
+        });
+        const updatedUserData = await response.json();
+
+        const index = users.findIndex(user => user.id === userId);
+        users[index] = updatedUserData;
+
+        renderUserList();
+        cancelForm();
+    } catch (error) {
+        alert('Error updating user!');
+    }
+}
+
+// Validate email format (basic validation to check for '@' symbol)
+function isValidEmail(email) {
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailPattern.test(email);
+}
+
+// Delete a user
+async function deleteUser(userId) {
+    try {
+        await fetch(`${API_URL}/${userId}`, { method: 'DELETE' });
+        users = users.filter(user => user.id !== userId);
+        renderUserList();
+    } catch (error) {
+        alert('Error deleting user!');
+    }
+}
+
+// Cancel the form and hide it
+function cancelForm() {
+    document.getElementById('userForm').classList.add('hidden');
+    clearFormFields();
+}
+
+// Clear form fields
+function clearFormFields() {
+    document.getElementById('firstName').value = '';
+    document.getElementById('lastName').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('department').value = '';
+}
+
+// Edit a user
+function editUser(userId) {
+    const user = users.find(user => user.id === userId);
+    if (user) {
+        showForm(user);
+    }
+}
+
+
+
+
+
